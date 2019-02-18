@@ -1,4 +1,6 @@
-# A.I
-Artificial Intelligence - Spring 2019
+# Artificial Intelligence 001 - Spring 2019
 
-Repo for team 6 projects
+Team 6:
+Andrew Welch abw28@zips.uakron.edu 2700340
+
+Nathan Wemmer
