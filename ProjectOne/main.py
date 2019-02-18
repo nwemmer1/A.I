@@ -1,3 +1,3 @@
 from projOneFunctions import *
 
-displayMenu()
+executeProgram()
