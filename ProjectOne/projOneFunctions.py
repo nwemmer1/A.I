@@ -47,7 +47,7 @@ def collectandValidateSub():
             return userInput
 
 
-def collectTrainingExampleFiles():
+def selectDataset():
     print("The following datasets are available for creating a decision tree: ")
     print("1. iris  2. wine")
     fileChoice = collectandValidateSub()
@@ -61,10 +61,44 @@ def collectTrainingExampleFiles():
         return wine
 
 
+def learnTree(dataset):
+    decisionTree = tree.DecisionTreeClassifier()
+    decisionTree = decisionTree.fit(dataset.data, dataset.target)
+    return decisionTree
+
+
+def displayTree(decisionTree):
+    print("A pdf has been generated displaying the decision tree generated!")
+    import graphviz
+    plotData = tree.export_graphviz(decisionTree, out_file=None,
+                                    filled=True, rounded=True,
+                                    special_characters=True)
+    treeGraph = graphviz.Source(plotData)
+    treeGraph.render("decisionTree")
+    pause = input("PRESS ENTER TO CONTINUE")
+
+
+def saveTree():
+
+    return
+
+
+def interactiveNewCase():
+    return
+
+
+def loadPreviousTreeForNewCases():
+    return
+
+
+def terminateProgram():
+    sys.exit("Program terminated.")
+
+
 def executeSelectedItem(userInput):
     if (userInput == 1):
-        collectTrainingExampleFiles()
-        learnTree()
+        decisionTree = learnTree(selectDataset())
+        displayTree(decisionTree)
     elif (userInput == 2):
         saveTree()
     # Option 3 requires additional menu and input validation
@@ -80,23 +114,3 @@ def executeSelectedItem(userInput):
         loadPreviousTreeForNewCases()
     else:
         terminateProgram()
-
-
-def learnTree():
-    return
-
-
-def saveTree():
-    return
-
-
-def interactiveNewCase():
-    return
-
-
-def loadPreviousTreeForNewCases():
-    return
-
-
-def terminateProgram():
-    sys.exit("Program terminated.")
