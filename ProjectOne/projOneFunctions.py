@@ -4,6 +4,13 @@
 import sys
 from sklearn import datasets
 from sklearn import tree
+import pickle
+
+# Flag for saving decision trees
+treeGenerated = False
+# Global decisionTree and save objects
+decisionTree = tree.DecisionTreeClassifier()
+saveObj = pickle.dumps(decisionTree)
 
 
 def executeProgram():
@@ -62,12 +69,14 @@ def selectDataset():
 
 
 def learnTree(dataset):
-    decisionTree = tree.DecisionTreeClassifier()
+    global decisionTree
     decisionTree = decisionTree.fit(dataset.data, dataset.target)
+    global treeGenerated
+    treeGenerated = True
     return decisionTree
 
 
-def displayTree(decisionTree):
+def displayTree():
     print("A pdf has been generated displaying the decision tree generated!")
     import graphviz
     plotData = tree.export_graphviz(decisionTree, out_file=None,
@@ -79,8 +88,11 @@ def displayTree(decisionTree):
 
 
 def saveTree():
-
-    return
+    global saveObj
+    saveObj = pickle.dumps(decisionTree)
+    print("The decision tree has been saved!")
+    pause = input("PRESS ENTER TO CONTINUE")
+    return saveObj
 
 
 def interactiveNewCase():
@@ -97,10 +109,14 @@ def terminateProgram():
 
 def executeSelectedItem(userInput):
     if (userInput == 1):
-        decisionTree = learnTree(selectDataset())
-        displayTree(decisionTree)
+        learnTree(selectDataset())
+        displayTree()
     elif (userInput == 2):
-        saveTree()
+        if (treeGenerated):
+            saveTree()
+        else:
+            print("ERROR: You have not created a decision tree yet!")
+            return
     # Option 3 requires additional menu and input validation
     elif (userInput == 3):
         print("1. Enter a new case interactively.")
