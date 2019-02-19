@@ -1,5 +1,9 @@
-# Utilized for terminating program with sys.exit()
+# Andrew Welch  <abw28@zips.uakron.edu>  2700340
+# A.I Project 1
+
 import sys
+from sklearn import datasets
+from sklearn import tree
 
 
 def executeProgram():
@@ -19,31 +23,47 @@ def displayMenu():
 
 
 def collectAndValidateMain():
-    userInput = int(input("Enter your choice:"))
+    print("Enter your choice: ")
+    userInput = int(input())
     isInvalid = True
     while (isInvalid):
         if (userInput > 5 or userInput < 1):
-            userInput = int(input(
-                "Invalid input. Please enter a number between 1 and 5:"))
+            print("Invalid input. Please enter a number between 1 and 5: ")
+            userInput = int(input())
         else:
             isInvalid = False
             return userInput
 
 
 def collectandValidateSub():
-    userInput = int(input("Enter your choice:"))
+    userInput = int(input("Enter your choice (1 or 2): "))
     isInvalid = True
     while (isInvalid):
         if (userInput > 2 or userInput < 1):
-            userInput = int(input(
-                "Invalid input. Please enter a number between 1 and 2:"))
+            print("Invalid input. Please enter a number between 1 and 2: ")
+            userInput = int(input())
         else:
             isInvalid = False
             return userInput
 
 
+def collectTrainingExampleFiles():
+    print("The following datasets are available for creating a decision tree: ")
+    print("1. iris  2. wine")
+    fileChoice = collectandValidateSub()
+    if (fileChoice == 1):
+        from sklearn.datasets import load_iris
+        iris = load_iris()
+        return iris
+    else:
+        from sklearn.datasets import load_wine
+        wine = load_wine()
+        return wine
+
+
 def executeSelectedItem(userInput):
     if (userInput == 1):
+        collectTrainingExampleFiles()
         learnTree()
     elif (userInput == 2):
         saveTree()
