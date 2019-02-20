@@ -89,8 +89,8 @@ def displayTree():
 
 def saveTree():
     fileName = input("Enter a name to save the decision tree as: ")
-    saveFile = open(fileName, 'w')
-    #pickle.dump(decisionTree, saveFile)
+    saveFile = open(fileName, 'wb')
+    pickle.dump(decisionTree, saveFile)
     print("The decision tree has been saved!")
     pause = input("PRESS ENTER TO CONTINUE")
 
