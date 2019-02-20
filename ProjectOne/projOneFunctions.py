@@ -6,11 +6,11 @@ from sklearn import datasets
 from sklearn import tree
 import pickle
 
+
 # Flag for saving decision trees
 treeGenerated = False
-# Global decisionTree and save objects
+# Global decisionTree (band-aid fix)
 decisionTree = tree.DecisionTreeClassifier()
-saveObj = pickle.dumps(decisionTree)
 
 
 def executeProgram():
@@ -88,11 +88,11 @@ def displayTree():
 
 
 def saveTree():
-    global saveObj
-    saveObj = pickle.dumps(decisionTree)
+    fileName = input("Enter a name to save the decision tree as: ")
+    saveFile = open(fileName, 'w')
+    #pickle.dump(decisionTree, saveFile)
     print("The decision tree has been saved!")
     pause = input("PRESS ENTER TO CONTINUE")
-    return saveObj
 
 
 def interactiveNewCase():
