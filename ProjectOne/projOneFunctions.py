@@ -73,13 +73,13 @@ def learnTree(dataset):
     decisionTree = decisionTree.fit(dataset.data, dataset.target)
     global treeGenerated
     treeGenerated = True
-    return decisionTree
+    return dataset
 
 
-def displayTree():
+def displayTree(dataset):
     print("A pdf has been generated displaying the decision tree generated!")
     import graphviz
-    plotData = tree.export_graphviz(decisionTree, out_file=None,
+    plotData = tree.export_graphviz(decisionTree, out_file=None, feature_names=dataset.feature_names, class_names=dataset.target_names,
                                     filled=True, rounded=True,
                                     special_characters=True)
     treeGraph = graphviz.Source(plotData)
@@ -109,8 +109,8 @@ def terminateProgram():
 
 def executeSelectedItem(userInput):
     if (userInput == 1):
-        learnTree(selectDataset())
-        displayTree()
+        dataset = learnTree(selectDataset())
+        displayTree(dataset)
     elif (userInput == 2):
         if (treeGenerated):
             saveTree()
