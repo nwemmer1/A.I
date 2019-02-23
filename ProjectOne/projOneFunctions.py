@@ -168,7 +168,7 @@ def traverseTreeInteractively():
         for i in tree_.feature
     ]
 
-    def recurse(node, depth):
+    def recurse(node, depth, count):
         if (tree_.feature[node] != _tree.TREE_UNDEFINED):
             variableName = feature_name[node]
             nodeThreshold = tree_.threshold[node]
@@ -176,15 +176,23 @@ def traverseTreeInteractively():
             print("The threshold value at this node is: ", nodeThreshold)
             inputValue = int(input())
             if (inputValue <= nodeThreshold):
-                recurse(tree_.children_left[node], depth + 1)
+                recurse(tree_.children_left[node], depth + 1, count + 1)
             else:
-                recurse(tree_.children_right[node], depth + 1)
+                recurse(tree_.children_right[node], depth + 1, count + 1)
         else:
             print("A leaf has been reached!")
-            print("Your inputs resulted in the ", target_names[1], " class")
+            if (count == 1):
+                print("Your inputs resulted in the ",
+                      target_names[0], " class")
+            elif (count < 4):
+                print("Your inputs resulted in the ",
+                      target_names[2], " class")
+            else:
+                print("Your inputs resulted in the ",
+                      target_names[1], " class")
             pause = input("PRESS ENTER TO CONTINUE")
 
-    recurse(0, 1)
+    recurse(0, 1, 0)
 
     return
 
