@@ -2,15 +2,18 @@
 # A.I Project 1
 
 import sys
-from sklearn import datasets
 from sklearn import tree
+from sklearn.tree import _tree
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.datasets import load_iris
 import pickle
 
 
 # Flag for saving decision trees
 treeGenerated = False
-# Global decisionTree (band-aid fix)
+# Global decisionTree and dataset (band-aid fix)
 decisionTree = tree.DecisionTreeClassifier()
+dataset = load_iris()
 
 
 def executeProgram():
@@ -54,49 +57,57 @@ def collectandValidateSub():
             return userInput
 
 
+def determineDisplayMethod():
+    print("A decision tree has been generated with the inputted data set!")
+    print("The tree can be displayed using standard output or using the graphviz package (if installed on your system).")
+    print("1. standard output   2. graphviz")
+
+
 def selectDataset():
-    print("The following datasets are available for creating a decision tree: ")
-    print("1. iris  2. wine")
+    print("The iris data set is available for testing or you may input your own data set:")
+    print("1. iris  2. enter file name")
     fileChoice = collectandValidateSub()
+    global dataset
     if (fileChoice == 1):
-        from sklearn.datasets import load_iris
-        iris = load_iris()
-        return iris
+        return
     else:
-        from sklearn.datasets import load_wine
-        wine = load_wine()
-        return wine
+        dataset = formatInputDataset()
 
 
-def learnTree(dataset):
+def learnTree():
+    global dataset
     global decisionTree
     decisionTree = decisionTree.fit(dataset.data, dataset.target)
     global treeGenerated
     treeGenerated = True
-    return dataset
 
 
-def displayTree(dataset):
-    print("A pdf has been generated displaying the decision tree generated!")
+def displayTree():
     import graphviz
     plotData = tree.export_graphviz(decisionTree, out_file=None, feature_names=dataset.feature_names, class_names=dataset.target_names,
                                     filled=True, rounded=True,
                                     special_characters=True)
     treeGraph = graphviz.Source(plotData)
-    treeGraph.render("decisionTree")
+    pdfName = input("Enter a valid name for the pdf (do not include .pdf) ")
+    treeGraph.render(pdfName)
+    print("A pdf has been generated displaying the decision tree generated!")
     pause = input("PRESS ENTER TO CONTINUE")
 
 
 def saveTree():
-    fileName = input("Enter a name to save the decision tree as: ")
+    fileName = input(
+        "Enter a name to save the decision tree as (include type extension): ")
     saveFile = open(fileName, 'wb')
     pickle.dump(decisionTree, saveFile)
     print("The decision tree has been saved!")
     pause = input("PRESS ENTER TO CONTINUE")
 
 
-def interactiveNewCase():
-    return
+def formatInputDataset():
+    import pandas as pd
+    dataName = input("Enter the file name for data set you wish to use: ")
+    userDataset = pd.read_csv(dataName)
+    return userDataset
 
 
 def loadPreviousTreeForNewCases():
@@ -108,25 +119,96 @@ def terminateProgram():
 
 
 def executeSelectedItem(userInput):
+    # Menu item 1
     if (userInput == 1):
-        dataset = learnTree(selectDataset())
-        displayTree(dataset)
+        selectDataset()
+        learnTree()
+        determineDisplayMethod()
+        choice = collectandValidateSub()
+        if (choice == 1):
+            displayTreeInTerminalAsFunction()
+            pause = input("PRESS ENTER TO CONTINUE")
+        else:
+            displayTree()
+    # Menu item 2
     elif (userInput == 2):
         if (treeGenerated):
             saveTree()
         else:
             print("ERROR: You have not created a decision tree yet!")
             return
-    # Option 3 requires additional menu and input validation
+    # Menu item 3
     elif (userInput == 3):
-        print("1. Enter a new case interactively.")
-        print("2. Quit.")
-        subMenuInput = collectandValidateSub()
-        if (subMenuInput == 1):
-            interactiveNewCase()
+        if (treeGenerated):
+            print("1. Enter a new case interactively.")
+            print("2. Quit.")
+            subMenuInput = collectandValidateSub()
+            if (subMenuInput == 1):
+                traverseTreeInteractively()
+            else:
+                return
         else:
+            print("ERROR: You have not created a decision tree yet!")
             return
+
+    # Menu item 4
     elif (userInput == 4):
         loadPreviousTreeForNewCases()
+    # Menu item 5
     else:
         terminateProgram()
+
+
+def traverseTreeInteractively():
+    tree_ = decisionTree.tree_
+    feature_names = dataset.feature_names
+    target_names = dataset.target_names
+    feature_name = [
+        feature_names[i] if i != _tree.TREE_UNDEFINED else "undefined!"
+        for i in tree_.feature
+    ]
+
+    def recurse(node, depth):
+        if (tree_.feature[node] != _tree.TREE_UNDEFINED):
+            variableName = feature_name[node]
+            nodeThreshold = tree_.threshold[node]
+            print("Input a value for ", variableName, ": ")
+            print("The threshold value at this node is: ", nodeThreshold)
+            inputValue = int(input())
+            if (inputValue <= nodeThreshold):
+                recurse(tree_.children_left[node], depth + 1)
+            else:
+                recurse(tree_.children_right[node], depth + 1)
+        else:
+            print("A leaf has been reached!")
+            print("Your inputs resulted in the ", target_names[1], " class")
+            pause = input("PRESS ENTER TO CONTINUE")
+
+    recurse(0, 1)
+
+    return
+
+
+def displayTreeInTerminalAsFunction():
+    print("The decision tree will be displayed in the form of a python function: ")
+    feature_names = dataset.feature_names
+    tree_ = decisionTree.tree_
+    feature_name = [
+        feature_names[i] if i != _tree.TREE_UNDEFINED else "undefined!"
+        for i in tree_.feature
+    ]
+    print("def tree({}):".format(", ".join(feature_names)))
+
+    def recurse(node, depth):
+        indent = "  " * depth
+        if (tree_.feature[node] != _tree.TREE_UNDEFINED):
+            name = feature_name[node]
+            threshold = tree_.threshold[node]
+            print("{}if {} <= {}:".format(indent, name, threshold))
+            recurse(tree_.children_left[node], depth + 1)
+            print("{}else:  # if {} > {}".format(indent, name, threshold))
+            recurse(tree_.children_right[node], depth + 1)
+        else:
+            print("{}return {}".format(indent, tree_.value[node]))
+
+    recurse(0, 1)
