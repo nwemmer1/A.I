@@ -57,12 +57,6 @@ def collectandValidateSub():
             return userInput
 
 
-def determineDisplayMethod():
-    print("A decision tree has been generated with the inputted data set!")
-    print("The tree can be displayed using standard output or using the graphviz package (if installed on your system).")
-    print("1. standard output   2. graphviz")
-
-
 def selectDataset():
     print("The iris data set is available for testing or you may input your own data set:")
     print("1. iris  2. enter file name")
@@ -110,10 +104,6 @@ def formatInputDataset():
     return userDataset
 
 
-def loadPreviousTreeForNewCases():
-    return
-
-
 def terminateProgram():
     sys.exit("Program terminated.")
 
@@ -123,13 +113,7 @@ def executeSelectedItem(userInput):
     if (userInput == 1):
         selectDataset()
         learnTree()
-        determineDisplayMethod()
-        choice = collectandValidateSub()
-        if (choice == 1):
-            displayTreeInTerminalAsFunction()
-            pause = input("PRESS ENTER TO CONTINUE")
-        else:
-            displayTree()
+        displayTree()
     # Menu item 2
     elif (userInput == 2):
         if (treeGenerated):
@@ -157,6 +141,15 @@ def executeSelectedItem(userInput):
     # Menu item 5
     else:
         terminateProgram()
+
+
+def loadPreviousTreeForNewCases():
+    global decisionTree
+    fileName = input(
+        "Enter the file name of the decision tree you wish to load (include type extension .sav): ")
+    decisionTree = pickle.load(open(fileName, 'rb'))
+    print(decisionTree)
+    return
 
 
 def traverseTreeInteractively():
@@ -193,30 +186,4 @@ def traverseTreeInteractively():
             pause = input("PRESS ENTER TO CONTINUE")
 
     recurse(0, 1, 0)
-
     return
-
-
-def displayTreeInTerminalAsFunction():
-    print("The decision tree will be displayed in the form of a python function: ")
-    feature_names = dataset.feature_names
-    tree_ = decisionTree.tree_
-    feature_name = [
-        feature_names[i] if i != _tree.TREE_UNDEFINED else "undefined!"
-        for i in tree_.feature
-    ]
-    print("def tree({}):".format(", ".join(feature_names)))
-
-    def recurse(node, depth):
-        indent = "  " * depth
-        if (tree_.feature[node] != _tree.TREE_UNDEFINED):
-            name = feature_name[node]
-            threshold = tree_.threshold[node]
-            print("{}if {} <= {}:".format(indent, name, threshold))
-            recurse(tree_.children_left[node], depth + 1)
-            print("{}else:  # if {} > {}".format(indent, name, threshold))
-            recurse(tree_.children_right[node], depth + 1)
-        else:
-            print("{}return {}".format(indent, tree_.value[node]))
-
-    recurse(0, 1)
