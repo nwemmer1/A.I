@@ -6,7 +6,10 @@ from sklearn import tree
 from sklearn.tree import _tree
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.datasets import load_iris
+from sklearn.datasets import load_wine
+from sklearn.model_selection import train_test_split
 import pickle
+import pandas as pd
 
 
 # Flag for saving decision trees
@@ -58,14 +61,17 @@ def collectandValidateSub():
 
 
 def selectDataset():
-    print("The iris data set is available for testing or you may input your own data set:")
-    print("1. iris  2. enter file name")
-    fileChoice = collectandValidateSub()
-    global dataset
+    print("The iris and wine data sets are available for testing or you may input your own .csv data set:")
+    print("1. iris  2. wine  3. enter a file name")
+    fileChoice = int(input())
     if (fileChoice == 1):
-        return
+        return True
+    elif (fileChoice == 2):
+        global dataset
+        dataset = load_wine()
+        return True
     else:
-        dataset = formatInputDataset()
+        return False
 
 
 def learnTree():
@@ -90,18 +96,28 @@ def displayTree():
 
 def saveTree():
     fileName = input(
-        "Enter a name to save the decision tree as (include type extension): ")
+        "Enter a name to save the decision tree as (include .sav type extension): ")
     saveFile = open(fileName, 'wb')
     pickle.dump(decisionTree, saveFile)
     print("The decision tree has been saved!")
     pause = input("PRESS ENTER TO CONTINUE")
 
 
-def formatInputDataset():
+def formatInputDatasetAndMakeTree():
     import pandas as pd
-    dataName = input("Enter the file name for data set you wish to use: ")
-    userDataset = pd.read_csv(dataName)
-    return userDataset
+    global dataset
+    dataName = input(
+        "Enter the file name for data set you wish to use (include .csv): ")
+    dataset = pd.read_csv(dataName, delimiter=',')
+    X = dataset.drop('Class', axis=1)
+    y = dataset['Class']
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20)
+    decisionTree.fit(X_train, y_train)
+    global treeGenerated
+    treeGenerated = True
+    print("Tree generated! Here are the specifications of the tree: ")
+    print(decisionTree)
+    pause = input("PRESS ENTER TO CONTINUE")
 
 
 def terminateProgram():
@@ -111,9 +127,11 @@ def terminateProgram():
 def executeSelectedItem(userInput):
     # Menu item 1
     if (userInput == 1):
-        selectDataset()
-        learnTree()
-        displayTree()
+        if (selectDataset()):
+            learnTree()
+            displayTree()
+        else:
+            formatInputDatasetAndMakeTree()
     # Menu item 2
     elif (userInput == 2):
         if (treeGenerated):
@@ -148,11 +166,18 @@ def loadPreviousTreeForNewCases():
     fileName = input(
         "Enter the file name of the decision tree you wish to load (include type extension .sav): ")
     decisionTree = pickle.load(open(fileName, 'rb'))
-    print(decisionTree)
+    global dataset
+    if (dataset == load_iris()):
+        dataset = load_wine()
+    else:
+        dataset = load_iris()
+    traverseTreeInteractively()
     return
 
 
 def traverseTreeInteractively():
+    global dataset
+    global decisionTree
     tree_ = decisionTree.tree_
     feature_names = dataset.feature_names
     target_names = dataset.target_names
